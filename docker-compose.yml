@@ -1,0 +1,25 @@
+
+ services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: node_app
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - PORT=3000
+    volumes:
+      - .:
+      - /node_modules
+# version: "3.8"
+# services:
+#   app:
+# 	build: .
+# 	ports:
+#   	- "3000:3000"
+# 	volumes:
+#   	- .:/app
+# 	command: npx nodemon server.js
