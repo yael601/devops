@@ -1,0 +1,42 @@
+name: Build and Push Docker Image
+
+on:
+  push:
+    branches:
+      - main       # שם הענף שעליו רוצים להפעיל את התהליך (למשל main או master)
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    steps:
+      # שלב ראשון: משיכת קוד המקור
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # שלב שני: התחברות ל-Docker Hub
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      # שלב שלישי: חילוץ מטא-דאטה (תגיות) לקונטיינר לפי הקומיט והענף
+      - name: Extract metadata (tags, labels)
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ secrets.DOCKERHUB_USERNAME }}/my-node-app # החליפי את my-node-app בשם הרצוי ל-Image
+          tags: |
+            type=raw,value=latest
+            type=sha,format=short
+
+      # שלב רביעי: בנייה ודחיפה של ה-Image
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
